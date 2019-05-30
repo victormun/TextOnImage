@@ -8,11 +8,19 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.ParcelFileDescriptor;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.FileDescriptor;
 import java.io.IOException;
@@ -27,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private Button openButton;
     private boolean isClicked = false;
     private ImageView imageView;
+    private FloatingActionButton addTextButton;
 
     /**
      * Class OnCreate method
@@ -83,12 +92,33 @@ public class MainActivity extends AppCompatActivity {
                 imageView.post(() -> {
                     imageView.setImageBitmap(bitmap);
                     openButton.setVisibility(View.GONE);
+                    addTextButton.show();
                 });
             } catch (IOException | NullPointerException e) {
                 e.printStackTrace();
                 Log.e(TAG, "Error loading image: " + e);
             }
         }).start();
+    }
+
+    /**
+     * Method that adds a {@link android.widget.TextView} to the layout
+     */
+    private void addTextView() {
+        TextView textView = new TextView(this);
+        textView.setId(View.generateViewId());
+        textView.setText("Introduce your text here");
+        textView.setTextSize(20);
+        textView.setTextColor(ContextCompat.getColor(this, android.R.color.white));
+        ConstraintLayout baseLayout = findViewById(R.id.main_base_layout);
+        baseLayout.addView(textView);
+        ConstraintSet set = new ConstraintSet();
+        set.clone(baseLayout);
+        set.connect(textView.getId(), ConstraintSet.TOP, baseLayout.getId(), ConstraintSet.TOP, 0);
+        set.connect(textView.getId(), ConstraintSet.BOTTOM, baseLayout.getId(), ConstraintSet.BOTTOM, 0);
+        set.connect(textView.getId(), ConstraintSet.START, baseLayout.getId(), ConstraintSet.START, 0);
+        set.connect(textView.getId(), ConstraintSet.END, baseLayout.getId(), ConstraintSet.END, 0);
+        set.applyTo(baseLayout);
     }
 
     /**
@@ -99,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
             if (!isClicked)
                 openFile();
         });
+        addTextButton.setOnClickListener(v -> addTextView());
     }
 
     /**
@@ -107,6 +138,7 @@ public class MainActivity extends AppCompatActivity {
     private void initViews() {
         openButton = findViewById(R.id.main_button_open);
         imageView = findViewById(R.id.main_image_view);
+        addTextButton = findViewById(R.id.main_button_text);
     }
 
     private Bitmap getBitmapFromUri(Uri uri) throws IOException, NullPointerException {
